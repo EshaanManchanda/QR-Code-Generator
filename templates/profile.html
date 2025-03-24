@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="app-container">
+  <h2 class="text-center mb-4">{% trans "User Profile" %}</h2>
+  
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card bg-dark text-white h-100">
+        <div class="card-body text-center">
+          <i class="fas fa-user-circle fa-4x mb-3"></i>
+          <h3>{{ user.username }}</h3>
+          <p class="text-muted">{% trans "Member since" %}: {{ user.date_joined|date:"F j, Y" }}</p>
+          
+          <div class="d-grid gap-2 mt-3">
+            <a href="{% url 'user_preferences' %}" class="btn btn-outline-light">
+              <i class="fas fa-cog me-2"></i>{% trans "Preferences" %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="card bg-dark text-white h-100">
+        <div class="card-header">
+          <h4>{% trans "QR Code Statistics" %}</h4>
+        </div>
+        <div class="card-body">
+          <div class="row text-center g-3">
+            <div class="col-md-4">
+              <div class="p-3 rounded" style="background-color: rgba(0,0,0,0.2);">
+                <i class="fas fa-qrcode fa-2x mb-2"></i>
+                <h5>{{ user_qr_codes.count }}</h5>
+                <p class="mb-0">{% trans "Total QR Codes" %}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 rounded" style="background-color: rgba(0,0,0,0.2);">
+                <i class="fas fa-download fa-2x mb-2"></i>
+                <h5>{{ total_downloads }}</h5>
+                <p class="mb-0">{% trans "Downloads" %}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 rounded" style="background-color: rgba(0,0,0,0.2);">
+                <i class="fas fa-share-alt fa-2x mb-2"></i>
+                <h5>{{ total_shares }}</h5>
+                <p class="mb-0">{% trans "Shares" %}</p>
+              </div>
+            </div>
+          </div>
+          
+          <h5 class="mt-4">{% trans "Recent Activity" %}</h5>
+          {% if user_qr_codes %}
+            <div class="table-responsive">
+              <table class="table table-dark table-hover">
+                <thead>
+                  <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Created" %}</th>
+                    <th>{% trans "Views" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for qr in user_qr_codes|slice:":5" %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'qr_detail' qr.id %}" class="text-decoration-none text-light">
+                        {{ qr.name|default:qr.content|truncatechars:20 }}
+                      </a>
+                    </td>
+                    <td>{{ qr.created_at|date:"M d, Y" }}</td>
+                    <td>{{ qr.view_count }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="text-center mt-3">
+              <a href="{% url 'qr_history' %}" class="btn btn-sm btn-outline-light">
+                {% trans "View All QR Codes" %}
+              </a>
+            </div>
+          {% else %}
+            <div class="alert alert-secondary">
+              {% trans "You haven't created any QR codes yet." %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

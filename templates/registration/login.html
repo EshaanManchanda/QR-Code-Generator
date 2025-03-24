@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Login" %} - {% trans "QR Code Generator" %}{% endblock %}
+
+{% block content %}
+<div class="app-container">
+  <h2 class="text-center mb-4">{% trans "Login" %}</h2>
+  
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label for="id_username" class="form-label">{% trans "Username" %}</label>
+      <input type="text" name="username" class="form-control" id="id_username" required>
+    </div>
+    
+    <div class="mb-3">
+      <label for="id_password" class="form-label">{% trans "Password" %}</label>
+      <input type="password" name="password" class="form-control" id="id_password" required>
+    </div>
+    
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn action-btn text-white">{% trans "Login" %}</button>
+    </div>
+  </form>
+  
+  <div class="text-center mt-3">
+    <p>{% trans "Don't have an account?" %} <a href="{% url 'register' %}" class="text-light">{% trans "Register here" %}</a></p>
+  </div>
+</div>
+{% endblock %} 

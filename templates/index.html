@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "QR Code Generator" %}{% endblock %}
+
+{% block extra_css %}
+.qr-form {
+  margin-bottom: 2rem;
+}
+
+.qr-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.qr-image {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 576px) {
+  .btn-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  .action-btn {
+    width: 100%;
+  }
+}
+
+.color-picker {
+  height: 38px;
+}
+
+.customization-options {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+  <form method="post" class="qr-form">
+    {% csrf_token %}
+    <h3 class="text-center mb-4">{% trans "Generate Your QR Code" %}</h3>
+    
+    <div class="input-group mb-3 shadow-sm">
+      <span class="input-group-text" id="inputGroup-sizing-default">
+        <i class="fas fa-link me-1"></i>
+      </span>
+      <input 
+        type="text" 
+        class="form-control form-control-lg" 
+        placeholder="{% trans 'Enter URL or text' %}" 
+        aria-describedby="inputGroup-sizing-default" 
+        name="qr_text" 
+        value="{{ qr_text|default:'' }}"
+        autofocus
+        required
+      >
+    </div>
+    
+    {% if user.is_authenticated %}
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="saveQrCode" name="save_qr_code" checked>
+      <label class="form-check-label" for="saveQrCode">
+        {% trans "Save this QR code to my collection" %}
+      </label>
+    </div>
+    
+    <div class="form-group mb-3">
+      <input type="text" class="form-control" placeholder="{% trans 'Name (optional)' %}" name="qr_name">
+    </div>
+    
+    <button class="btn btn-sm btn-outline-light mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#customizationOptions">
+      <i class="fas fa-palette me-1"></i> {% trans "Customize" %}
+    </button>
+    
+    <div class="collapse customization-options" id="customizationOptions">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="foregroundColor" class="form-label">{% trans "Foreground Color" %}</label>
+          <input type="color" class="form-control form-control-color color-picker w-100" 
+                 id="foregroundColor" name="foreground_color" 
+                 value="{{ foreground_color|default:'#000000' }}">
+        </div>
+        <div class="col-md-6">
+          <label for="backgroundColor" class="form-label">{% trans "Background Color" %}</label>
+          <input type="color" class="form-control form-control-color color-picker w-100" 
+                 id="backgroundColor" name="background_color" 
+                 value="{{ background_color|default:'#FFFFFF' }}">
+        </div>
+        <div class="col-md-6">
+          <label for="boxSize" class="form-label">{% trans "Box Size" %} (5-20)</label>
+          <input type="range" class="form-range" id="boxSize" name="box_size" 
+                 min="5" max="20" value="{{ box_size|default:10 }}">
+          <div class="text-center"><span id="boxSizeValue">{{ box_size|default:10 }}</span></div>
+        </div>
+        <div class="col-md-6">
+          <label for="border" class="form-label">{% trans "Border Size" %} (0-10)</label>
+          <input type="range" class="form-range" id="border" name="border" 
+                 min="0" max="10" value="{{ border|default:4 }}">
+          <div class="text-center"><span id="borderValue">{{ border|default:4 }}</span></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    <div class="d-grid mt-4">
+      <button type="submit" class="btn btn-lg action-btn text-white">
+        <i class="fas fa-magic me-2"></i>{% trans "Generate QR Code" %}
+      </button>
+    </div>
+  </form>
+  
+  {% if qr_image_base64 %}
+  <div class="qr-result">
+    <h4 class="text-center">{% trans "QR Code for" %} "<span class="fw-italic">{{ variable }}</span>"</h4>
+    
+    <div class="qr-image">
+      <img src="data:image/png;base64,{{ qr_image_base64 }}" alt="QR Code" class="img-fluid">
+    </div>
+    
+    <div class="btn-container">
+      <div class="dropdown">
+        <button class="btn action-btn text-white dropdown-toggle" type="button" id="downloadDropdown" 
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-download me-2"></i>{% trans "Download" %}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
+          <li><a class="dropdown-item" href="#" onclick="downloadQR('png'); return false;">PNG</a></li>
+          <li><a class="dropdown-item" href="#" onclick="downloadQR('svg'); return false;">SVG</a></li>
+          <li><a class="dropdown-item" href="#" onclick="downloadQR('pdf'); return false;">PDF</a></li>
+        </ul>
+      </div>
+      
+      <div class="dropdown">
+        <button class="btn action-btn text-white dropdown-toggle" type="button" id="shareDropdown" 
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-share-alt me-2"></i>{% trans "Share" %}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="shareDropdown">
+          <li><a class="dropdown-item" href="#" onclick="shareQR('twitter'); return false;">Twitter</a></li>
+          <li><a class="dropdown-item" href="#" onclick="shareQR('facebook'); return false;">Facebook</a></li>
+          <li><a class="dropdown-item" href="#" onclick="shareQR('email'); return false;">Email</a></li>
+          <li><a class="dropdown-item" href="#" onclick="shareQR('whatsapp'); return false;">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Update range input displays
+    const boxSize = document.getElementById('boxSize');
+    const boxSizeValue = document.getElementById('boxSizeValue');
+    const border = document.getElementById('border');
+    const borderValue = document.getElementById('borderValue');
+    
+    if (boxSize && boxSizeValue) {
+      boxSize.addEventListener('input', function() {
+        boxSizeValue.textContent = this.value;
+      });
+    }
+    
+    if (border && borderValue) {
+      border.addEventListener('input', function() {
+        borderValue.textContent = this.value;
+      });
+    }
+  });
+
+  function downloadQR(format) {
+    {% if user.is_authenticated %}
+    // Track download for analytics
+    fetch('{% url "track_download" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        format: format,
+        qr_id: '{{ qr_id|default:"" }}'
+      })
+    });
+    {% endif %}
+    
+    if (format === 'png') {
+      const link = document.createElement('a');
+      link.href = 'data:image/png;base64,{{ qr_image_base64 }}';
+      link.download = 'qr_code.png';
+      link.click();
+    } else {
+      // For other formats, make a server request
+      window.location.href = `{% url 'download_qr' %}?format=${format}&id={{ qr_id|default:"" }}`;
+    }
+  }
+
+  function shareQR(platform) {
+    {% if user.is_authenticated %}
+    // Track share for analytics
+    fetch('{% url "track_share" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        platform: platform,
+        qr_id: '{{ qr_id|default:"" }}'
+      })
+    });
+    {% endif %}
+    
+    const text = '{% trans "Check out this QR Code" %}';
+    const url = window.location.href;
+    
+    let shareUrl;
+    
+    switch(platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case 'email':
+        shareUrl = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+        break;
+      default:
+        // Web Share API if available
+        if (navigator.share) {
+          navigator.share({
+            title: text,
+            url: url
+          })
+            .then(() => console.log('Shared successfully'))
+            .catch((error) => console.log('Error sharing:', error));
+          return;
+        }
+    }
+    
+    window.open(shareUrl, '_blank');
+  }
+</script>
+{% endblock %}

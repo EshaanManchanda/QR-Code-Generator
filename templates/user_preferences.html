@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Preferences" %} - {% trans "QR Code Generator" %}{% endblock %}
+
+{% block content %}
+<div class="app-container">
+  <h2 class="text-center mb-4">{% trans "User Preferences" %}</h2>
+  
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    
+    <div class="card bg-dark mb-4">
+      <div class="card-header">
+        <h4>{% trans "Language Settings" %}</h4>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="language" class="form-label">{% trans "Preferred Language" %}</label>
+          <select class="form-select" id="language" name="language">
+            {% get_available_languages as LANGUAGES %}
+            {% for lang_code, lang_name in LANGUAGES %}
+              <option value="{{ lang_code }}" {% if preferences.language == lang_code %}selected{% endif %}>
+                {{ lang_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <div class="form-text text-light opacity-75">
+            {% trans "This will be used as your default language throughout the application." %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card bg-dark mb-4">
+      <div class="card-header">
+        <h4>{% trans "Default QR Code Settings" %}</h4>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="default_qr_foreground" class="form-label">{% trans "Default Foreground Color" %}</label>
+            <input type="color" class="form-control form-control-color w-100" 
+                   id="default_qr_foreground" name="default_qr_foreground" 
+                   value="{{ preferences.default_qr_foreground }}">
+            <div class="form-text text-light opacity-75">
+              {% trans "This color will be used as the default for new QR codes." %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="default_qr_background" class="form-label">{% trans "Default Background Color" %}</label>
+            <input type="color" class="form-control form-control-color w-100" 
+                   id="default_qr_background" name="default_qr_background" 
+                   value="{{ preferences.default_qr_background }}">
+            <div class="form-text text-light opacity-75">
+              {% trans "This color will be used as the default for new QR codes." %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn action-btn text-white">
+        <i class="fas fa-save me-2"></i>{% trans "Save Preferences" %}
+      </button>
+    </div>
+  </form>
+  
+  <div class="card bg-dark">
+    <div class="card-header">
+      <h4>{% trans "Account Settings" %}</h4>
+    </div>
+    <div class="card-body">
+      <p>{% trans "Need to change your password or update account details?" %}</p>
+      <a href="{% url 'profile' %}" class="btn btn-outline-light">
+        <i class="fas fa-user me-2"></i>{% trans "Go to Profile" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

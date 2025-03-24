@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Register" %} - {% trans "QR Code Generator" %}{% endblock %}
+
+{% block content %}
+<div class="app-container">
+  <h2 class="text-center mb-4">{% trans "Create an Account" %}</h2>
+  
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label for="id_username" class="form-label">{% trans "Username" %}</label>
+      <input type="text" name="username" class="form-control" id="id_username" required>
+      <div class="form-text text-light opacity-75">
+        {% trans "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only." %}
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="id_password1" class="form-label">{% trans "Password" %}</label>
+      <input type="password" name="password1" class="form-control" id="id_password1" required>
+      <div class="form-text text-light opacity-75">
+        <ul>
+          <li>{% trans "Your password can't be too similar to your other personal information." %}</li>
+          <li>{% trans "Your password must contain at least 8 characters." %}</li>
+          <li>{% trans "Your password can't be a commonly used password." %}</li>
+          <li>{% trans "Your password can't be entirely numeric." %}</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="id_password2" class="form-label">{% trans "Password confirmation" %}</label>
+      <input type="password" name="password2" class="form-control" id="id_password2" required>
+      <div class="form-text text-light opacity-75">
+        {% trans "Enter the same password as before, for verification." %}
+      </div>
+    </div>
+    
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn action-btn text-white">{% trans "Register" %}</button>
+    </div>
+  </form>
+  
+  <div class="text-center mt-3">
+    <p>{% trans "Already have an account?" %} <a href="{% url 'login' %}" class="text-light">{% trans "Login here" %}</a></p>
+  </div>
+</div>
+{% endblock %} 
