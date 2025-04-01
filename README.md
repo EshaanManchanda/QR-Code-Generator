@@ -9,6 +9,8 @@ A comprehensive web application that allows users to generate, customize, manage
 - **Customization Options**: 
   - Choose foreground and background colors
   - Adjust QR code size and border
+  - Upload a logo and specify its position
+  - Select download image size and format (PNG, SVG, PDF)
   - Name and organize your QR codes
 - **Multiple Export Formats**: Download QR codes as PNG, SVG, or PDF
 - **User Profile & Preferences**: 
@@ -94,7 +96,14 @@ The application provides a RESTful API for generating and managing QR codes prog
      "foreground_color": "#000000",
      "background_color": "#FFFFFF",
      "box_size": 10,
-     "border": 4
+     "border": 4,
+     "logo": "path/to/logo.png",
+     "logo_size": 100,
+     "transparent_background": false,
+     "logo_position": "center",
+     "border_style": "solid",
+     "download_size": 300,
+     "download_format": "png"
    }
    ```
 

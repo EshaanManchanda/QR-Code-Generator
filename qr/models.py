@@ -15,6 +15,26 @@ class QRCode(models.Model):
     box_size = models.PositiveIntegerField(_('Box Size'), default=10)
     border = models.PositiveIntegerField(_('Border Size'), default=4)
     
+    # New fields for logo customization
+    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
+    logo_size = models.PositiveIntegerField(default=100)  # Size in pixels
+    transparent_background = models.BooleanField(default=False)  # Transparent background option
+    
+    # New fields for additional customization
+    logo_position = models.CharField(_('Logo Position'), max_length=20, choices=[
+        ('center', _('Center')),
+        ('top-left', _('Top Left')),
+        ('top-right', _('Top Right')),
+        ('bottom-left', _('Bottom Left')),
+        ('bottom-right', _('Bottom Right')),
+    ], default='center')
+    
+    border_style = models.CharField(_('Border Style'), max_length=20, choices=[
+        ('solid', _('Solid')),
+        ('dashed', _('Dashed')),
+        ('dotted', _('Dotted')),
+    ], default='solid')
+    
     # For analytics
     view_count = models.PositiveIntegerField(_('View Count'), default=0)
     download_count = models.PositiveIntegerField(_('Download Count'), default=0)
